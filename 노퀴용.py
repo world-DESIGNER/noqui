@@ -54,7 +54,7 @@ def download_and_convert(playlist_url, duration, bitrate, full_video, trim_audio
     # Write video ids and titles to a text file
     with open('노래목록.txt', 'w') as f:
         for video_info in video_infos:
-            f.write(f"{video_info['id']}.ogg|{video_info['title']}|\n")
+            f.write(f"{video_info['id']}|{video_info['title']}|\n")
 
 # Get user input for duration, bitrate and whether to trim the audio
 duration = int(input("추출된 오디오의 길이를 초 단위로 입력하십시오: "))

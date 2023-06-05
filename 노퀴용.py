@@ -52,7 +52,7 @@ def download_and_convert(playlist_url, duration, bitrate, trim_audio):
             os.remove(f"{video_id}_trimmed.wav")
 
     # Write video ids and titles to a text file
-    with open('노래목록.txt', 'w') as f:
+    with open('노래목록.txt', 'w', encoding='utf-8') as f:
         for video_info in video_infos:
             f.write(f"{video_info['id']}|{video_info['title']}|\n")
 

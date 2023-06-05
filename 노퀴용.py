@@ -2,7 +2,7 @@ import os
 import youtube_dl
 from pydub import AudioSegment
 
-def download_and_convert(playlist_url, duration, bitrate, full_video):
+def download_and_convert(playlist_url, duration, bitrate, full_video, trim_audio):
     ydl_opts = {
         'format': 'bestaudio/best' if not full_video else 'bestvideo+bestaudio',
         'outtmpl': '%(id)s.%(ext)s',
@@ -26,33 +26,40 @@ def download_and_convert(playlist_url, duration, bitrate, full_video):
             print(f"{video_id} 다운로드 실패")
             continue
 
-        # Trim the audio file
-        try:
-            audio = AudioSegment.from_wav(f"{video_id}.wav")
-            audio = audio[:duration*1000]  # Get the first 'duration' seconds
-            audio.export(f"{video_id}_trimmed.wav", format="wav")
-        except Exception as e:
-            print(f"{video_id} 자르기 실패: {e}")
-            continue
+        # Trim the audio file if trim_audio is True
+        if trim_audio:
+            try:
+                audio = AudioSegment.from_wav(f"{video_id}.wav")
+                audio = audio[:duration*1000]  # Get the first 'duration' seconds
+                audio.export(f"{video_id}_trimmed.wav", format="wav")
+            except Exception as e:
+                print(f"{video_id} 자르기 실패: {e}")
+                continue
+
+            input_file = f"{video_id}_trimmed.wav"
+        else:
+            input_file = f"{video_id}.wav"
 
         # Convert to ogg using ffmpeg
-        conversion_result = os.system(f"ffmpeg -i {video_id}_trimmed.wav -b:a {bitrate} {video_id}.ogg")
+        conversion_result = os.system(f"ffmpeg -i {input_file} -b:a {bitrate} {video_id}.ogg")
 
         if conversion_result != 0:
             print(f"{video_id} 변환 실패")
 
         # Delete the original and trimmed wav files
         os.remove(f"{video_id}.wav")
-        os.remove(f"{video_id}_trimmed.wav")
+        if trim_audio:
+            os.remove(f"{video_id}_trimmed.wav")
 
     # Write video ids and titles to a text file
     with open('노래목록.txt', 'w') as f:
         for video_info in video_infos:
             f.write(f"{video_info['id']}.ogg|{video_info['title']}|\n")
 
-# Get user input for duration and bitrate
+# Get user input for duration, bitrate and whether to trim the audio
 duration = int(input("추출된 오디오의 길이를 초 단위로 입력하십시오: "))
 bitrate = input("추출된 오디오의 비트레이트를 비트 단위로 입력하십시오 (예: 64k 또는 128k): ")
 full_video = input("전체 비디오를 다운로드 하시겠습니까? (예/아니오): ").lower() == '예'
+trim_audio = input("오디오를 잘라서 저장하시겠습니까? (예/아니오): ").lower() == '예'
 
-download_and_convert("YOUR_PLAYLIST_URL_HERE", duration, bitrate, full_video)
+download_and_convert("YOUR_PLAYLIST_URL_HERE", duration, bitrate, full_video, trim_audio)

@@ -7,7 +7,7 @@ def download_and_convert(playlist_url, duration, bitrate, trim_audio):
         'format': 'bestaudio',
         'outtmpl': '%(id)s.%(ext)s',
         'download_archive': '다운로드한 노래 목록.txt',
-        'ignoreerrors': False,
+        'ignoreerrors': True,
         'nooverwrites': True,
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',

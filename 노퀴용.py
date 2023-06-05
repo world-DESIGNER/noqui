@@ -64,4 +64,4 @@ duration = 0
 if trim_audio:
     duration = int(input("추출할 길이를 초 단위로 입력하십시오: "))
 
-download_and_convert("PLlz6c0mvyPv6AqkPOtksa6rfB6JoIgyvs", duration, bitrate, trim_audio)
+download_and_convert("YOUR_PLAYLIST_URL_HERE", duration, bitrate, trim_audio)

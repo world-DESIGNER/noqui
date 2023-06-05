@@ -6,7 +6,7 @@ def download_and_convert(playlist_url, duration, bitrate, full_video):
     ydl_opts = {
         'format': 'bestaudio/best' if not full_video else 'bestvideo+bestaudio',
         'outtmpl': '%(id)s.%(ext)s',
-        'download_archive': 'downloaded_songs.txt',
+        'download_archive': '다운로드한 노래 목록.txt',
         'ignoreerrors': False,
         'nooverwrites': True,
         'postprocessors': [{
@@ -46,7 +46,7 @@ def download_and_convert(playlist_url, duration, bitrate, full_video):
         os.remove(f"{video_id}_trimmed.wav")
 
     # Write video ids and titles to a text file
-    with open('video_info.txt', 'w') as f:
+    with open('노래목록.txt', 'w') as f:
         for video_info in video_infos:
             f.write(f"{video_info['id']}.ogg|{video_info['title']}|\n")
 

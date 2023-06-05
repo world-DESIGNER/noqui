@@ -2,9 +2,9 @@ import os
 import youtube_dl
 from pydub import AudioSegment
 
-def download_and_convert(playlist_url, duration, bitrate, full_video, trim_audio):
+def download_and_convert(playlist_url, duration, bitrate, trim_audio):
     ydl_opts = {
-        'format': 'bestaudio/best' if not full_video else 'bestvideo+bestaudio',
+        'format': 'bestaudio',
         'outtmpl': '%(id)s.%(ext)s',
         'download_archive': '다운로드한 노래 목록.txt',
         'ignoreerrors': False,
@@ -56,10 +56,12 @@ def download_and_convert(playlist_url, duration, bitrate, full_video, trim_audio
         for video_info in video_infos:
             f.write(f"{video_info['id']}|{video_info['title']}|\n")
 
-# Get user input for duration, bitrate and whether to trim the audio
-duration = int(input("추출된 오디오의 길이를 초 단위로 입력하십시오: "))
+# Get user input for bitrate and whether to trim the audio
 bitrate = input("추출된 오디오의 비트레이트를 비트 단위로 입력하십시오 (예: 64k 또는 128k): ")
-full_video = input("전체 비디오를 다운로드 하시겠습니까? (예/아니오): ").lower() == '예'
-trim_audio = input("오디오를 잘라서 저장하시겠습니까? (예/아니오): ").lower() == '예'
+trim_audio = input("오디오를 원본 길이 그대로 저장하시겠습니까? (예/아니오): ").lower() != '예'
 
-download_and_convert("YOUR_PLAYLIST_URL_HERE", duration, bitrate, full_video, trim_audio)
+duration = 0
+if trim_audio:
+    duration = int(input("추출할 길이를 초 단위로 입력하십시오: "))
+
+download_and_convert("PLlz6c0mvyPv6AqkPOtksa6rfB6JoIgyvs", duration, bitrate, trim_audio)

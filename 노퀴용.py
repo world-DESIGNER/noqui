@@ -1,0 +1,58 @@
+import os
+import youtube_dl
+from pydub import AudioSegment
+
+def download_and_convert(playlist_url, duration, bitrate, full_video):
+    ydl_opts = {
+        'format': 'bestaudio/best' if not full_video else 'bestvideo+bestaudio',
+        'outtmpl': '%(id)s.%(ext)s',
+        'download_archive': 'downloaded_songs.txt',
+        'ignoreerrors': False,
+        'nooverwrites': True,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'wav',
+        }],
+    }
+
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(playlist_url, download=True)
+        video_infos = [entry for entry in info_dict['entries'] if entry is not None]
+
+    for video_info in video_infos:
+        video_id = video_info['id']
+
+        if not os.path.exists(f"{video_id}.wav"):
+            print(f"{video_id} 다운로드 실패")
+            continue
+
+        # Trim the audio file
+        try:
+            audio = AudioSegment.from_wav(f"{video_id}.wav")
+            audio = audio[:duration*1000]  # Get the first 'duration' seconds
+            audio.export(f"{video_id}_trimmed.wav", format="wav")
+        except Exception as e:
+            print(f"{video_id} 자르기 실패: {e}")
+            continue
+
+        # Convert to ogg using ffmpeg
+        conversion_result = os.system(f"ffmpeg -i {video_id}_trimmed.wav -b:a {bitrate} {video_id}.ogg")
+
+        if conversion_result != 0:
+            print(f"{video_id} 변환 실패")
+
+        # Delete the original and trimmed wav files
+        os.remove(f"{video_id}.wav")
+        os.remove(f"{video_id}_trimmed.wav")
+
+    # Write video ids and titles to a text file
+    with open('video_info.txt', 'w') as f:
+        for video_info in video_infos:
+            f.write(f"{video_info['id']}.ogg|{video_info['title']}|\n")
+
+# Get user input for duration and bitrate
+duration = int(input("추출된 오디오의 길이를 초 단위로 입력하십시오: "))
+bitrate = input("추출된 오디오의 비트레이트를 비트 단위로 입력하십시오 (예: 64k 또는 128k): ")
+full_video = input("전체 비디오를 다운로드 하시겠습니까? (예/아니오): ").lower() == '예'
+
+download_and_convert("YOUR_PLAYLIST_URL_HERE", duration, bitrate, full_video)
